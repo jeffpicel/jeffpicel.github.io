@@ -4,27 +4,34 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Jeffrey Picel</title>
-<meta name="description" content="Jeffrey Picel, independent AI researcher working on learned critics that steer and guard language-model agents.">
+<meta name="description" content="Jeffrey Picel, independent AI researcher: how to trust what AI agents do, from learned critics to measurement and incentives.">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <main>
-<nav><a href="./" aria-current="page">Home</a><a href="agenda.html">Research agenda</a></nav>
+<nav><a href="./" aria-current="page">Home</a><a href="agenda.html">Critics (current work)</a></nav>
 
 <h1>Jeffrey Picel</h1>
 <p class="tagline">Independent AI researcher · AI safety, reasoning and evaluation</p>
 
-<p>I'm an independent AI researcher. The question I'm working on: can a small network watching a language-model agent mid-task tell that the attempt is heading somewhere bad, early enough to redirect it or stop it? I call these networks critics. A critic reads the model's internal state partway through a task and forecasts how the attempt will end. I use critics to steer reasoning and to guard tool-using agents, for example against instructions planted in the data an agent reads (prompt injection), and I compare them with the usual alternative, training the agent itself by reinforcement learning. A paper is in preparation.</p>
+<p>I'm an independent AI researcher. Most of what I work on comes back to one question: how can we trust what an AI agent does when nobody can check every step? That splits into smaller questions. Can we tell, partway through, that an attempt is going wrong? What does training actually teach an agent, and what does it miss? And how do we measure any of this well enough to believe the answer?</p>
 
-<p>Before this I spent about seven years as a data scientist (DS) and machine learning (ML) engineer, first at Airbnb and then at Faire. At Faire I was the founding data team member (DS and ML/AI) for the brand side of the marketplace (Senior, promoted to Staff in 2023). For some time I was the data team tech lead for marketplace quality. That work comes down to a trade-off: the cost of missing a harmful brand against the cost of penalizing a good one. To act on those calls, I used the production downranking systems our engineering team built. On the catalog pod, by the end of my time there, we were using generative AI for problems like recognizing the same product across Faire and third-party websites (entity resolution). I also built causal-measurement systems in production, and co-authored the company's first experimentation guide.</p>
+<h2>What I'm working on</h2>
+<p>Only the first of these is written up so far. The rest are placeholders for now.</p>
+<ul class="interests">
+  <li><strong>Critics that guard and steer agents.</strong> Small networks that read an agent's internal state partway through a task and forecast how the attempt will end, used to steer it or stop it. I compare them with training the agent itself by reinforcement learning. A paper is in preparation. <a href="agenda.html">Read more</a></li>
+  <li><strong>Knowing when to stop.</strong> When should a reasoning model stop spending compute, or say a task can't be done? <span class="soon">Notes coming.</span></li>
+  <li><strong>What training teaches.</strong> Given the same experience, what does a reinforcement-learning-trained agent learn, and what does a separate critic learn? <span class="soon">Notes coming.</span></li>
+  <li><strong>Transfer.</strong> Does a critic trained on one task or one model still work on another? <span class="soon">Notes coming.</span></li>
+  <li><strong>Measurement for AI.</strong> Bringing causal inference and careful evaluation design to how AI systems are tested. <span class="soon">Notes coming.</span></li>
+  <li><strong>Incentives and delegation.</strong> What economics says about handing open-ended work to an agent whose goals you can't fully write down. <span class="soon">Notes coming.</span></li>
+  <li><strong>Ideas from the brain.</strong> What neuroscience of learning from reward suggests for how AI critics are built. <span class="soon">Notes coming.</span></li>
+</ul>
+
+<h2>Background</h2>
+<p>Before this I spent about seven years as a data scientist (DS) and machine learning (ML) engineer, first at Airbnb and then at Faire. At Faire I was the founding data team member (DS and ML/AI) for the brand side of the marketplace (Senior, promoted to Staff in 2023). I led the data science behind the system our Sales team used to choose which brands to pursue, and I conceived and led an ongoing measurement of the causal value brands added to the marketplace. For some time I was the data team tech lead for marketplace quality, which comes down to a trade-off: the cost of missing a harmful brand against the cost of penalizing a good one. To act on those calls, I used the production downranking systems our engineering team built. I also co-authored the company's first experimentation guide.</p>
 
 <p>Before industry I did a PhD in economics at Harvard. My dissertation's lead paper used quirks in financial reporting, such as a past return rolling out of the 52-week window the Wall Street Journal printed, to find evidence that investors extrapolate from whichever past returns are most visible to them. Before that I studied mathematics and economics at the University of Chicago.</p>
-
-<h2>Research</h2>
-<ul>
-  <li><a href="agenda.html">Safety research agenda: critics that guard and steer agents</a></li>
-  <li>Papers: in preparation.</li>
-</ul>
 
 <h2>Elsewhere</h2>
 <ul class="links">
