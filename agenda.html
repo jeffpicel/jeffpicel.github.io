@@ -48,14 +48,14 @@
 <p>Two questions I care most about next. Does a frozen critic catch attacks and failures it was never trained on? And when an attacker probes for a critic's blind spots, does the probing itself leave a trace that can be detected? And in both cases, I want to work on tasks where stating the user's intent isn't enough.</p>
 
 <h2>Other questions in this line</h2>
-<p>These are placeholders for now.</p>
+<p>The critic work splits into four questions. Only the first is written up so far; the others are placeholders for now.</p>
 <ul class="interests">
-  <li><strong>Knowing when to stop.</strong> When should a reasoning model stop spending compute, or say a task can't be done? <span class="soon">Notes coming.</span></li>
-  <li><strong>Habits and second looks.</strong> Reinforcement learning seems to turn a task into a habit; a critic adds a second look before acting. When is each worth it, especially for decisions that are costly to undo? <span class="soon">Notes coming.</span></li>
-  <li><strong>Transfer.</strong> Does a critic trained on one task or one model still work on another? <span class="soon">Notes coming.</span></li>
-  <li><strong>Does an agent's confidence track reward?</strong> An agent's own confidence ranks its outcomes well in some tasks and poorly in others. When does it, and when does a learned critic add the most? <span class="soon">Notes coming.</span></li>
-  <li><strong>Ideas from the brain.</strong> What the neuroscience of learning from reward suggests for how critics are built. <span class="soon">Notes coming.</span></li>
+  <li><strong>Critics and reinforcement learning: what each one teaches.</strong> Reinforcement learning seems to turn a task into a habit; a critic adds a second look before acting. When does that second look add to what training already taught, and when does it only repeat it, especially for decisions that are costly to undo? The first results above are the start of this.</li>
+  <li><strong>World representations in long reasoning.</strong> What picture of the task does a reasoning model build over a long attempt, and can we read it? That picture also decides what a critic can learn when reward comes only at the end, because a critic carries what it learns back through time across the states the picture treats as alike. And does the agent's own confidence track any of it? <span class="soon">Notes coming.</span></li>
+  <li><strong>When and how to step in.</strong> A critic can watch all the time but act only sometimes. When should it intervene, and in what way? <span class="soon">Notes coming.</span></li>
+  <li><strong>Knowing when to stop, and what time costs.</strong> When should a reasoning model stop spending compute, or say a task can't be done? <span class="soon">Notes coming.</span></li>
 </ul>
+<p>Two more threads run alongside these. <strong>Transfer:</strong> does a critic trained on one task or one model still work on another? That is part of the wider question on the <a href="./">home page</a> of how gains from reward data travel. <strong>Ideas from the brain:</strong> what the neuroscience of learning from reward suggests for how critics are built.</p>
 
 <p class="footnote">* Wilson score interval (a range for a percentage). It gives a 95% range for a proportion such as 32 of 100 and, unlike the textbook normal-approximation interval, stays sensible near 0% and 100%, which matters for the 0-of-100 result. It assumes independent attempts, which holds roughly here (one attempt per task), and is the standard choice for proportions from small samples.</p>
 
