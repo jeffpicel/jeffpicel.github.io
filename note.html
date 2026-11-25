@@ -22,7 +22,7 @@
 
 <h2>The test</h2>
 <p><strong>The task.</strong> Blocksworld is a planning puzzle: move stacked blocks from a start arrangement to a goal arrangement, one block at a time. Some puzzles have no solution, and the model may declare a puzzle impossible. A wrong declaration ends the attempt with no credit. Every puzzle here has 14 or 15 blocks.</p>
-<p>This setup is harder than the usual one. The standard language-model benchmark, PlanBench (Valmeekam and colleagues), uses puzzles of about 3 to 5 blocks, and nearly all published reinforcement-learning results on Blocksworld use that size. PlanBench does have unsolvable variants, but they are scored on a single answer. Here the model plays one board move by move over a long budget, it can give up wrongly at any point, and the puzzles are about three times larger. So these scores cannot be compared directly with published Blocksworld numbers.</p>
+<p>This setup is harder than the usual one. The standard language-model benchmark, PlanBench (Valmeekam and colleagues), uses puzzles of about 3 to 5 blocks, and none of the published reinforcement-learning results on Blocksworld I found uses puzzles this large. PlanBench does have unsolvable variants, but they are scored on a single answer. Here the model plays one board move by move over a long budget, it can wrongly declare a puzzle impossible at any point, and the puzzles are about three times larger. So these scores cannot be compared directly with published Blocksworld numbers.</p>
 <p><strong>The model.</strong> Qwen3.6-35B-A3B, an open-weight reasoning model, run at its maker's recommended settings.</p>
 <p><strong>The methods compared.</strong></p>
 <ul>
