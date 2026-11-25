@@ -4,14 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Research note · Jeffrey Picel</title>
-<meta name="description" content="Research note: a learned critic and reinforcement learning add up on a sealed planning test and a prompt-injection benchmark.">
+<meta name="description" content="Research note: at equal samples, a learned critic still adds on top of reinforcement learning, on a sealed planning test and a prompt-injection benchmark.">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <main>
 <nav><a href="./">Home</a><a href="agenda.html">Critics (current work)</a><a href="note.html" aria-current="page">Research note</a></nav>
 
-<h1>Critics and reinforcement learning add up</h1>
+<h1>A critic still helps after reinforcement learning</h1>
 <p class="tagline">Research note · Jeffrey Picel · November 2026</p>
 
 <p class="note">This note summarizes a paper in preparation. The Blocksworld results come from a sealed test that was opened once and is final. The AgentDojo results come from development data and can still change. Training details are left out until the paper is posted.</p>
@@ -19,7 +19,7 @@
 <h2>The question</h2>
 <p>Reinforcement learning is the standard way to make a language model better at a task: you change the model's weights until it succeeds more often. A <strong>critic</strong> is a different route. It is a small separate network that reads the model's internal state partway through an attempt and forecasts whether the attempt will succeed. When the model is unsure, it drafts several candidate continuations, the critic scores them, and the model keeps the best one. The model itself never changes.</p>
 <p>So two questions follow. Can a critic on the untouched model keep up with reinforcement learning? And if you use both, do the gains add up, or does reinforcement learning already capture what the critic adds? The answer matters for safety because a critic can be inspected, swapped or switched off without touching the model, and because whatever it learned is separate from what training taught the model.</p>
-<p>Earlier work points toward "substitutes". In studies that put a verifier on top of a tuned model (Uesato and colleagues, 2022; Hosseini and colleagues' V-STaR, 2024), the verifier added less once the model was tuned. But those comparisons were lopsided: the verifier ranked 64 to 256 samples per problem while the tuned model got one. Here both routes learn from the same number of the model's attempts and play with the same token budget. To my knowledge this is the first comparison on those terms with a critic that steers a reasoning model partway through its thinking, and the first to put an interval on whether the two gains add up.</p>
+<p>Earlier work points toward substitutes. In every published comparison I found that puts a verifier on top of a tuned model, including two where the tuning was reinforcement learning (Uesato and colleagues, 2022; Wang and colleagues' Math-Shepherd, 2024), the verifier added less once the model was tuned. Those studies used math and code models from before today's long-thinking reasoning models, and they gave the verifier 64 to 256 samples per problem while the tuned model got one. <strong>To my knowledge, this is the first comparison of reinforcement learning, a learned critic and the two together on a reasoning model at equal samples: both learn from the same attempts, and both play with the same budget of generated tokens.</strong></p>
 
 
 <h2>The test</h2>
@@ -44,7 +44,7 @@
   <li><strong>Critic on the original model against the judge: +40.4 points</strong> (95% interval* +37.1 to +43.7).</li>
   <li><strong>Critic on the RL-trained model against the RL-trained model alone: +5.9 points</strong> (95% interval +3.9 to +7.9).</li>
 </ul>
-<p>The critic on the untouched model and the RL-trained model came out about even: +0.2 points (−2.4 to +2.8). Each beat the judge by about 40 points.</p>
+<p>The critic on the untouched model and the RL-trained model came out about even: +0.2 points (−2.4 to +2.8). The two routes also overlap a lot. Each alone beat the judge by about 40 points, and together they beat it by 46, so reinforcement learning captures most of what the critic adds on the untouched model. The second test asked whether anything is left over, and about 6 points is.</p>
 
 <figure>
 <svg class="fig" viewBox="0 0 700 286" role="img" aria-labelledby="figtitle figdesc">
@@ -108,7 +108,7 @@
 <tr><td>Critic on the RL-trained model</td><td>2.4</td><td>13.4</td></tr>
 </tbody>
 </table>
-<p>Most of the critic's gain over the judge is knowing when not to give up: wrong declarations fall from 44.7 points to 19.9. On top of reinforcement learning, the critic almost eliminates wrong declarations (17.6 points to 2.4). It pays for that by running out of budget more often, and at twice the budget most of those attempts finish, which is why the lead grows. My reading, which the paper still has to test, is that reinforcement learning and the critic learn different things, so their gains add up.</p>
+<p>Most of the critic's gain over the judge is not declaring solvable puzzles impossible: wrong declarations fall from 44.7 points to 19.9. On top of reinforcement learning, the critic almost eliminates wrong declarations (17.6 points to 2.4). It pays for that by running out of budget more often, and at twice the budget most of those attempts finish, which is why the lead grows. My reading, which the paper still has to test, is that reinforcement learning and the critic learn partly different things, so the critic still adds on top.</p>
 
 <h2>One puzzle, end to end</h2>
 <p>Take one solvable 14-block puzzle from the sealed set.</p>
