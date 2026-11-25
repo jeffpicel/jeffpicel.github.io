@@ -23,18 +23,12 @@
 <p>For those cases I want a monitor that works <em>during</em> the attempt, before the damage, and that carries over to tasks and attacks it wasn't trained on. My working bet is a <strong>critic</strong>: a small network that reads the agent's internal state partway through an attempt and forecasts how the attempt will end.</p>
 
 <h2>First results</h2>
-<p>Reinforcement learning changes the model itself. A critic is a small separate network that leaves the model untouched, so it can be inspected, swapped or switched off. Can the add-on keep up with reinforcement learning? And if you use both, do the gains add up or overlap? So far the answer is that they add up.</p>
-<p><strong>Blocksworld (sealed test, final).</strong> Blocksworld is a planning puzzle, and one puzzle in ten has no solution. I set aside 1,700 puzzles before the experiment, wrote the analysis down in advance, and scored them once. Every method got the same budget of 262,144 generated tokens per puzzle. The score is 90% of the share of solvable puzzles solved plus 10% of the share of impossible ones correctly declared impossible.</p>
+<p>Reinforcement learning changes the model itself. A critic is a small separate network that leaves the model untouched, so it can be inspected, swapped or switched off. Can the add-on keep up with reinforcement learning? And if you use both, do the gains add up or overlap? So far they add up.</p>
 <ul>
-  <li><strong>A critic on the untouched model matched reinforcement learning.</strong> The critic steering the original model scored 78.5%. The same model trained with GRPO (group relative policy optimization, a standard reinforcement-learning method) scored 78.4%, a difference of +0.2 points (95% interval −2.4 to +2.8). The best method without a critic, a language-model judge choosing among candidates, scored 38.2%. Most of the critic's lead over the judge came from knowing when to stop: the judge lost 44.7 points to calling solvable puzzles impossible, and the critic lost 19.9.</li>
-  <li><strong>On top of reinforcement learning, the critic still added.</strong> The critic steering the RL-trained model scored 84.2%, which is 5.9 points above the RL-trained model alone (95% interval 3.9 to 7.9). With twice the budget, the lead grew to 14.6 points (96.6% against 82.0%).</li>
+  <li><strong>Blocksworld, sealed test of 1,700 planning puzzles:</strong> a critic on the untouched model matched reinforcement learning (78.5% against 78.4%), and a critic on top of reinforcement learning added 5.9 points (95% interval 3.9 to 7.9).</li>
+  <li><strong>AgentDojo, prompt injection, development data:</strong> the critic on top of reinforcement learning scored 1.2 points above reinforcement learning alone (95% interval 0.2 to 2.5). A sealed test on held-out tasks comes next.</li>
 </ul>
-<p><strong>AgentDojo (development data).</strong> On 29 everyday tool-use tasks (314 cases, 285 of them with an attack planted in the data), the score is safe success: the task is done and the attack is not. The original model scored 78.4%.</p>
-<ul>
-  <li><strong>The critic alone came close to reinforcement learning.</strong> It scored 88.7% against GRPO's 91.3% (−2.6 points, 95% interval −6.8 to +0.5). It finished tasks as often, but let more attacks through: 7.0% against 0.7%.</li>
-  <li><strong>The two together beat either one.</strong> The critic steering the RL-trained model scored 92.5%, which is 1.2 points above GRPO alone (95% interval 0.2 to 2.5). None of its 570 attacked attempts was hijacked, against 8 of GRPO's 1,140. A sealed test on held-out tasks (AgentDyn) comes next.</li>
-</ul>
-<p>My reading, which the paper still has to test, is that reinforcement learning and the critic pick up different things, so their gains add up rather than overlap.</p>
+<p class="note"><a href="note.html">Read the research note</a> for the full results: how the test was set up, a figure and tables for every method, where the gains come from, one puzzle traced end to end, and the limitations.</p>
 
 <h2>The approach</h2>
 <p>I train the critic on the frozen agent's own attempts. At each checkpoint it reads the agent's internal state and predicts the chance that the attempt ends well: the task done, with nothing unsafe along the way, as judged by an exact check of the outcome. I then use it in two ways: as a <strong>monitor</strong> that flags an attempt before the harm lands, and as a <strong>steerer</strong> that branches where the agent is torn and keeps the continuation it rates best.</p>
