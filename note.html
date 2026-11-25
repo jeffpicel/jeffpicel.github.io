@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Research note · Jeffrey Picel</title>
+<meta name="description" content="Research note: a learned critic and reinforcement learning add up on a sealed planning test and a prompt-injection benchmark.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main>
+<nav><a href="./">Home</a><a href="agenda.html">Critics (current work)</a><a href="note.html" aria-current="page">Research note</a></nav>
+
+<h1>Critics and reinforcement learning add up</h1>
+<p class="tagline">Research note · Jeffrey Picel · November 2026</p>
+
+<p class="note">This note summarizes a paper in preparation. The Blocksworld results come from a sealed test that was opened once and is final. The AgentDojo results come from development data and can still change. Training details are left out until the paper is posted.</p>
+
+<h2>The question</h2>
+<p>Reinforcement learning is the standard way to make a language model better at a task: you change the model's weights until it succeeds more often. A <strong>critic</strong> is a different route. It is a small separate network that reads the model's internal state partway through an attempt and forecasts whether the attempt will succeed. When the model is unsure, it drafts several candidate continuations, the critic scores them, and the model keeps the best one. The model itself never changes.</p>
+<p>So two questions follow. Can a critic on the untouched model keep up with reinforcement learning? And if you use both, do the gains add up, or does reinforcement learning already capture what the critic adds? The answer matters for safety because a critic can be inspected, swapped or switched off without touching the model, and because whatever it learned is separate from what training taught the model.</p>
+
+<h2>The test</h2>
+<p><strong>The task.</strong> Blocksworld is a planning puzzle: move stacked blocks from a start arrangement to a goal arrangement, one block at a time. Some puzzles have no solution, and the model may declare a puzzle impossible. A wrong declaration ends the attempt with no credit. Every puzzle here has 14 or 15 blocks.</p>
+<p><strong>The model.</strong> Qwen3.6-35B-A3B, an open-weight reasoning model, run at its maker's recommended settings.</p>
+<p><strong>The methods compared.</strong></p>
+<ul>
+  <li><strong>Critic on the original model:</strong> the untouched model, steered by a critic trained on the outcomes of that model's own attempts on separate training puzzles.</li>
+  <li><strong>RL-trained model:</strong> the same model trained with GRPO (group relative policy optimization, a standard reinforcement-learning method) on separate training puzzles. I kept the checkpoint that scored best on development puzzles.</li>
+  <li><strong>Critic on the RL-trained model:</strong> the RL-trained model, steered by a critic trained on its attempts.</li>
+  <li><strong>Language-model judge:</strong> the strongest method without a critic. The model rates its own candidate continuations with the standard Tree of Thoughts vote prompt (Yao and colleagues, 2023), and the best-rated one is kept.</li>
+  <li><strong>Retry:</strong> the model on its own, trying again from the current board when a line of thinking runs long.</li>
+</ul>
+<p><strong>A fair budget.</strong> Every method got the same budget of 262,144 generated tokens per puzzle, and every token counts, including candidates the critic or judge threw away. I also read each attempt at twice that budget, 524,288 tokens.</p>
+<p><strong>The sealed set.</strong> I set aside 1,700 puzzles (1,530 solvable and 170 impossible) before the experiment. I wrote the analysis plan down first, with two main comparisons fixed in advance, and opened the set once. The score is 90% of the share of solvable puzzles solved plus 10% of the share of impossible puzzles correctly declared impossible.</p>
+
+<h2>Results</h2>
+<p>Both comparisons fixed in advance passed, after the Holm method (raises the significance bar for each extra test).</p>
+<ul>
+  <li><strong>Critic on the original model against the judge: +40.4 points</strong> (95% interval* +37.1 to +43.7).</li>
+  <li><strong>Critic on the RL-trained model against the RL-trained model alone: +5.9 points</strong> (95% interval +3.9 to +7.9).</li>
+</ul>
+<p>The critic on the untouched model and the RL-trained model came out about even: +0.2 points (−2.4 to +2.8). Each beat the judge by about 40 points.</p>
+
+<figure>
+<svg class="fig" viewBox="0 0 700 286" role="img" aria-labelledby="figtitle figdesc">
+<title id="figtitle">Sealed Blocksworld score by method at two token budgets</title>
+<desc id="figdesc">Dot plot. For each method, a blue dot marks the score at 262,144 tokens per puzzle and an orange dot the score at 524,288. Values are listed at the right and in the table below.</desc>
+<g class="legend"><circle cx="210" cy="16" r="6" class="s1"/><text x="222" y="20" class="lab">262,144 tokens</text><circle cx="350" cy="16" r="6" class="s2"/><text x="362" y="20" class="lab">524,288 tokens (twice the budget)</text></g>
+<line x1="210.0" x2="210.0" y1="36" y2="236" class="grid"/><text x="210.0" y="254" class="tick" text-anchor="middle">0%</text>
+<line x1="297.5" x2="297.5" y1="36" y2="236" class="grid"/><text x="297.5" y="254" class="tick" text-anchor="middle">25%</text>
+<line x1="385.0" x2="385.0" y1="36" y2="236" class="grid"/><text x="385.0" y="254" class="tick" text-anchor="middle">50%</text>
+<line x1="472.5" x2="472.5" y1="36" y2="236" class="grid"/><text x="472.5" y="254" class="tick" text-anchor="middle">75%</text>
+<line x1="560.0" x2="560.0" y1="36" y2="236" class="grid"/><text x="560.0" y="254" class="tick" text-anchor="middle">100%</text>
+<text x="196" y="61" class="lab" text-anchor="end">Critic on the RL-trained model</text>
+<line x1="504.7" x2="548.1" y1="56" y2="56" class="link"/>
+<circle cx="548.1" cy="56" r="6" class="s2 ring"><title>Critic on the RL-trained model, 524,288 tokens: 96.6%</title></circle>
+<circle cx="504.7" cy="56" r="6" class="s1 ring"><title>Critic on the RL-trained model, 262,144 tokens: 84.2%</title></circle>
+<text x="578" y="61" class="val">84.2% → 96.6%</text>
+<text x="196" y="101" class="lab" text-anchor="end">RL-trained model alone</text>
+<line x1="484.4" x2="497.0" y1="96" y2="96" class="link"/>
+<circle cx="497.0" cy="96" r="6" class="s2 ring"><title>RL-trained model alone, 524,288 tokens: 82.0%</title></circle>
+<circle cx="484.4" cy="96" r="6" class="s1 ring"><title>RL-trained model alone, 262,144 tokens: 78.4%</title></circle>
+<text x="578" y="101" class="val">78.4% → 82.0%</text>
+<text x="196" y="141" class="lab" text-anchor="end">Critic on the original model</text>
+<line x1="484.8" x2="488.6" y1="136" y2="136" class="link"/>
+<circle cx="488.6" cy="136" r="6" class="s2 ring"><title>Critic on the original model, 524,288 tokens: 79.6%</title></circle>
+<circle cx="484.8" cy="136" r="6" class="s1 ring"><title>Critic on the original model, 262,144 tokens: 78.5%</title></circle>
+<text x="578" y="141" class="val">78.5% → 79.6%</text>
+<text x="196" y="181" class="lab" text-anchor="end">Language-model judge</text>
+<line x1="343.7" x2="371.0" y1="176" y2="176" class="link"/>
+<circle cx="371.0" cy="176" r="6" class="s2 ring"><title>Language-model judge, 524,288 tokens: 46.0%</title></circle>
+<circle cx="343.7" cy="176" r="6" class="s1 ring"><title>Language-model judge, 262,144 tokens: 38.2%</title></circle>
+<text x="578" y="181" class="val">38.2% → 46.0%</text>
+<text x="196" y="221" class="lab" text-anchor="end">Retry</text>
+<circle cx="315.0" cy="216" r="6" class="s2 ring"><title>Retry, 524,288 tokens: 30.0%</title></circle>
+<circle cx="315.0" cy="216" r="6" class="s1 ring"><title>Retry, 262,144 tokens: 30.0%</title></circle>
+<text x="578" y="221" class="val">30.0% → 30.0%</text>
+</svg>
+<figcaption>Sealed Blocksworld score for each method at the standard budget (blue) and at twice the budget (orange). The two leading methods are the critic on top of reinforcement learning, then reinforcement learning alone.</figcaption>
+</figure>
+
+<table>
+<thead><tr><th>Method</th><th>Score at 262,144 tokens (95% interval)</th><th>At twice the budget</th></tr></thead>
+<tbody>
+<tr><td>Critic on the RL-trained model</td><td>84.2% (82.3 to 86.0)</td><td>96.6%</td></tr>
+<tr><td>Critic on the original model</td><td>78.5% (76.7 to 80.4)</td><td>79.6%</td></tr>
+<tr><td>RL-trained model alone</td><td>78.4% (76.8 to 79.9)</td><td>82.0%</td></tr>
+<tr><td>Language-model judge</td><td>38.2% (36.1 to 40.4)</td><td>46.0%</td></tr>
+<tr><td>Retry</td><td>30.0% (28.4 to 31.6)</td><td>30.0%</td></tr>
+</tbody>
+</table>
+
+<p>At twice the budget the picture shifts in one place. The critic on top of reinforcement learning pulls further ahead, by 14.6 points (+13.1 to +16.2). Reinforcement learning alone now edges the critic on the original model, by 2.4 points (−4.6 to −0.1).</p>
+
+<h2>Where the gains come from</h2>
+<p>Every lost point is one of two kinds: a wrong "impossible" on a solvable puzzle, or running out of budget.</p>
+<table>
+<thead><tr><th>Method</th><th>Points lost to wrong declarations</th><th>Points lost to running out of budget</th></tr></thead>
+<tbody>
+<tr><td>Language-model judge</td><td>44.7</td><td>17.1</td></tr>
+<tr><td>Critic on the original model</td><td>19.9</td><td>1.6</td></tr>
+<tr><td>RL-trained model alone</td><td>17.6</td><td>4.1</td></tr>
+<tr><td>Critic on the RL-trained model</td><td>2.4</td><td>13.4</td></tr>
+</tbody>
+</table>
+<p>Most of the critic's gain over the judge is knowing when not to give up: wrong declarations fall from 44.7 points to 19.9. On top of reinforcement learning, the critic almost eliminates wrong declarations (17.6 points to 2.4). It pays for that by running out of budget more often, and at twice the budget most of those attempts finish, which is why the lead grows. My reading, which the paper still has to test, is that reinforcement learning and the critic learn different things, so their gains add up.</p>
+
+<h2>One puzzle, end to end</h2>
+<p>Take one solvable 14-block puzzle from the sealed set.</p>
+<ul>
+  <li>The <strong>judge</strong> declared it impossible after 159,638 tokens. That's wrong, so it scores 0.</li>
+  <li><strong>Retry</strong> declared it impossible after 35,664 tokens: 0.</li>
+  <li>The <strong>critic on the original model</strong> solved it at 162,419 tokens: 1.</li>
+  <li>The <strong>RL-trained model alone</strong> was still working at the budget, and solved it only at 285,065 tokens: 0 at the standard budget, 1 at twice the budget.</li>
+  <li>The <strong>critic on the RL-trained model</strong> solved it at 153,515 tokens: 1.</li>
+</ul>
+<p>Each solved puzzle adds about 0.06 points to its method's score (0.9 divided by 1,530 solvable puzzles). This one shows both effects the averages carry: the critic keeps the original model from a wrong "impossible", and on the RL-trained model it reaches the goal inside a budget that reinforcement learning alone overran.</p>
+
+<h2>A second setting: prompt injection (development data)</h2>
+<p>AgentDojo (Debenedetti and colleagues, NeurIPS 2024) gives a tool-using agent everyday tasks in email, banking, travel and workspace apps, and plants attacker instructions in the data it reads. The score is safe success: the user's task is done and the attacker's is not. On 29 development tasks (314 cases, 285 of them attacked), with the same model:</p>
+<ul>
+  <li>The original model alone scored 78.4%.</li>
+  <li>The RL-trained model scored 91.3%, and the critic on the original model 88.7% (−2.6 points, 95% interval −6.8 to +0.5). The critic completed tasks as often, but let more attacks through: 7.0% against 0.7%.</li>
+  <li>The critic on the RL-trained model scored 92.5%, 1.2 points above reinforcement learning alone (+0.2 to +2.5). None of its 570 attacked attempts was hijacked, against 8 of the RL-trained model's 1,140.</li>
+</ul>
+<p>These are development numbers, read before the sealed test, and one comparison among many. A sealed test on held-out tasks comes next.</p>
+
+<h2>Limitations</h2>
+<ul>
+  <li>One planning game and one model family so far. The paper adds AgentDojo as a second domain.</li>
+  <li>In this puzzle set, impossible puzzles share a surface feature that a model could notice. Development data bound how much that could add: under half a point of the score, far less than either margin.</li>
+  <li>The comparison matches generated tokens. It does not compare the cost of training a critic with the cost of reinforcement learning.</li>
+  <li>The AgentDojo results are from development data.</li>
+</ul>
+
+<h2>Methods</h2>
+<p class="footnote">* <strong>95% t interval.</strong> The 1,700 puzzles were scored in 25 groups. The interval treats each group's score as one observation and uses Student's t distribution with 24 degrees of freedom, so it reflects variation between groups of puzzles. This is the textbook interval for a mean from a modest number of groups.<br><br>
+<strong>Holm method (raises the significance bar for each extra test).</strong> Each test is one-sided. With two pre-set tests, the smaller p-value must clear 2.5% and the other 5%. It controls the chance of any false positive across both tests, and it is standard for a small family of planned comparisons. Both tests passed with p-values far below their bars (about 4 × 10⁻¹⁹ and 2 × 10⁻⁶).<br><br>
+<strong>Cluster bootstrap (resamples whole tasks for a range)</strong>, used for AgentDojo. Its intervals come from resampling whole user tasks with replacement, so cases from the same task stay together. It suits data where cases within a task are related, and it is a common choice for benchmark comparisons.</p>
+
+<footer>Written with help from Claude. · <a href="./">Jeffrey Picel</a></footer>
+</main>
+</body>
+</html>

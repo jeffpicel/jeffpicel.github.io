@@ -38,3 +38,19 @@ footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--rule);
 .interests { list-style: none; padding: 0; }
 .interests li { margin-bottom: 1rem; }
 .soon { color: var(--muted); font-style: italic; }
+:root { --series-1: #2a78d6; --series-2: #eb6834; --grid: #e3e0d8; }
+@media (prefers-color-scheme: dark) { :root { --series-1: #3987e5; --series-2: #d95926; --grid: #2e3238; } }
+figure { margin: 1.5rem 0; }
+figcaption { font-size: .9rem; color: var(--muted); margin-top: .5rem; }
+.fig { width: 100%; height: auto; font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; }
+.fig .lab { font-size: 13px; fill: var(--text); }
+.fig .val { font-size: 13px; fill: var(--muted); }
+.fig .tick { font-size: 12px; fill: var(--muted); }
+.fig .grid { stroke: var(--grid); stroke-width: 1; }
+.fig .link { stroke: var(--muted); stroke-width: 2; opacity: .5; }
+.fig .s1 { fill: var(--series-1); }
+.fig .s2 { fill: var(--series-2); }
+.fig .ring { stroke: var(--bg); stroke-width: 2; }
+table { border-collapse: collapse; width: 100%; font-size: .9rem; margin: 1rem 0 1.5rem; display: block; overflow-x: auto; }
+th, td { text-align: left; padding: .4rem .6rem; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; font-weight: 600; }
