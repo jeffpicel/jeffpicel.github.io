@@ -31,7 +31,7 @@
   <li><strong>Language-model judge:</strong> the strongest method without a critic. The model rates its own candidate continuations with the standard Tree of Thoughts vote prompt (Yao and colleagues, 2023), and the best-rated one is kept.</li>
   <li><strong>Retry:</strong> the model on its own, trying again from the current board when a line of thinking runs long.</li>
 </ul>
-<p><strong>A fair budget.</strong> Every method got the same budget of 262,144 generated tokens per puzzle, and every token counts, including candidates the critic or judge threw away. I also read each attempt at twice that budget, 524,288 tokens.</p>
+<p><strong>A fair budget.</strong> Every method got the same budget of 262,144 generated tokens per puzzle, and every token counts, including candidates the critic or judge threw away. This budget was fixed as the primary one before the sealed set was opened, and both main comparisons are tested at it. Attempts unfinished at that point kept going to twice the budget, 524,288 tokens, which the plan also fixed in advance as a secondary reading with intervals and no tests.</p>
 <p><strong>The sealed set.</strong> I set aside 1,700 puzzles (1,530 solvable and 170 impossible) before the experiment. I wrote the analysis plan down first, with two main comparisons fixed in advance, and opened the set once. The score is 90% of the share of solvable puzzles solved plus 10% of the share of impossible puzzles correctly declared impossible.</p>
 
 <h2>Results</h2>
@@ -91,7 +91,7 @@
 </tbody>
 </table>
 
-<p>At twice the budget the picture shifts in one place. The critic on top of reinforcement learning pulls further ahead, by 14.6 points (+13.1 to +16.2). Reinforcement learning alone now edges the critic on the original model, by 2.4 points (−4.6 to −0.1).</p>
+<p>At twice the budget, the secondary reading, the picture shifts in one place. The critic on top of reinforcement learning pulls further ahead, by 14.6 points (+13.1 to +16.2). Reinforcement learning alone now edges the critic on the original model, by 2.4 points (−4.6 to −0.1).</p>
 
 <h2>Where the gains come from</h2>
 <p>Every lost point is one of two kinds: a wrong "impossible" on a solvable puzzle, or running out of budget.</p>
