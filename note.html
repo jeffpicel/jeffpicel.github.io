@@ -4,26 +4,30 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Research note · Jeffrey Picel</title>
-<meta name="description" content="Research note: at equal samples, a learned critic still adds on top of reinforcement learning, on a sealed planning test and a prompt-injection benchmark.">
+<meta name="description" content="Research note: on tasks with risky actions, steering with a learned critic still helps after reinforcement learning, at equal samples, on a sealed planning test and a prompt-injection benchmark.">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <main>
 <nav><a href="./">Home</a><a href="agenda.html">Critics (current work)</a><a href="note.html" aria-current="page">Research note</a></nav>
 
-<h1>Steering with a critic helps even after reinforcement learning</h1>
+<h1>Steering with a critic helps even after reinforcement learning, on tasks with risky actions</h1>
 <p class="tagline">Research note · Jeffrey Picel · November 2026</p>
 
 <p class="note">This note summarizes a paper in preparation. The Blocksworld results come from a sealed test that was opened once and is final. The AgentDojo results come from development data and can still change. Training details are left out until the paper is posted.</p>
 
 <h2>The question</h2>
-<p>Reinforcement learning is the standard way to make a language model better at a task: you change the model's weights until it succeeds more often. A <strong>critic</strong> is a different route. It is a small separate network that reads the model's internal state partway through an attempt and forecasts whether the attempt will succeed. When the model is unsure, it drafts several candidate continuations, the critic scores them, and the model keeps the best one. The model itself never changes.</p>
-<p>So two questions follow. Can a critic on the untouched model keep up with reinforcement learning? And if you use both, do the gains add up, or does reinforcement learning already capture what the critic adds? The answer matters for safety because a critic can be inspected, swapped or switched off without touching the model, and because whatever it learned is separate from what training taught the model.</p>
+<p>Agents now take actions that are hard to undo: they send money, delete files, follow an instruction planted in an email, or wrongly declare that a task cannot be done. Reinforcement learning, the standard way to make a model better at a task, changes the model's weights until it succeeds more often on average. But on these tasks one wrong action can cost more than many right ones earn.</p>
+<p>A <strong>critic</strong> is a different route. It is a small separate network that reads the model's internal state partway through an attempt and forecasts whether the attempt will end well. When the model is unsure, it drafts several candidate continuations, the critic scores them, and the model keeps the best one. The model itself never changes, so the critic can be inspected, swapped or switched off without touching it. That makes a critic a natural safety layer at exactly the moments that matter: when the agent is about to commit.</p>
+<p>So the question is practical. If you have already trained a model with reinforcement learning, does steering it with a critic still help on tasks with risky actions? Or has reinforcement learning already captured what the critic would add?</p>
 <p>Earlier work points toward substitutes. In every published comparison I found that puts a verifier on top of a tuned model, including two where the tuning was reinforcement learning (Uesato and colleagues, 2022; Wang and colleagues' Math-Shepherd, 2024), the verifier added less once the model was tuned. Those studies used math and code models from before today's long-thinking reasoning models, and they gave the verifier 64 to 256 samples per problem while the tuned model got one. <strong>To my knowledge, this is the first comparison of reinforcement learning, a learned critic and the two together at equal samples: both learn from the same attempts, and both play with the same budget of generated tokens. It is also the first such comparison on a reasoning model.</strong></p>
 
 
-<h2>The test</h2>
-<p><strong>The task.</strong> Blocksworld is a planning puzzle: move stacked blocks from a start arrangement to a goal arrangement, one block at a time. Some puzzles have no solution, and the model may declare a puzzle impossible. A wrong declaration ends the attempt with no credit. Every puzzle here has 14 or 15 blocks.</p>
+<h2>Two settings, one design</h2>
+<p>I test this in two settings, built so the same question can be asked in both. The first is a rehearsal with exact answers. The second is a real safety problem.</p>
+<p><strong>Blocksworld, with one risky action.</strong> Blocksworld is a planning puzzle: move stacked blocks from a start arrangement to a goal arrangement, one block at a time. I added one risky action. Some puzzles have no solution, and the model may declare a puzzle impossible at any point, but the declaration ends the attempt for good. Declaring a solvable puzzle impossible forfeits it, so the model has to judge when a declaration is right. Every move and every declaration can be checked exactly, so I can see where each method goes wrong. Every puzzle here has 14 or 15 blocks.</p>
+<p><strong>AgentDojo, where the risk is real.</strong> A tool-using agent works on everyday tasks while attackers plant instructions in the data it reads, and the risky actions are the ones an attacker wants, such as sending money or data to the wrong place (details below).</p>
+<h2>The Blocksworld test</h2>
 <p>This setup is harder than the usual one. The standard language-model benchmark, PlanBench (Valmeekam and colleagues), uses puzzles of about 3 to 5 blocks, and none of the published reinforcement-learning results on Blocksworld I found uses puzzles this large. PlanBench does have unsolvable variants, but they are scored on a single answer. Here the model plays one board move by move over a long budget, it can wrongly declare a puzzle impossible at any point, and the puzzles are about three times larger. So these scores cannot be compared directly with published Blocksworld numbers.</p>
 <p><strong>The model.</strong> Qwen3.6-35B-A3B, an open-weight reasoning model, run at its maker's recommended settings.</p>
 <p><strong>The methods compared.</strong></p>
@@ -108,7 +112,7 @@
 <tr><td>Critic on the RL-trained model</td><td>2.4</td><td>13.4</td></tr>
 </tbody>
 </table>
-<p>Most of the critic's gain over the judge is not declaring solvable puzzles impossible: wrong declarations fall from 44.7 points to 19.9. On top of reinforcement learning, the critic almost eliminates wrong declarations (17.6 points to 2.4). It pays for that by running out of budget more often, and at twice the budget most of those attempts finish, which is why the lead grows. My reading, which the paper still has to test, is that reinforcement learning and the critic learn partly different things, so the critic still adds on top.</p>
+<p>Most of the gain is on the risky action. Most of the critic's gain over the judge is not declaring solvable puzzles impossible: wrong declarations fall from 44.7 points to 19.9. On top of reinforcement learning, the critic almost eliminates wrong declarations (17.6 points to 2.4). It pays for that by running out of budget more often, and at twice the budget most of those attempts finish, which is why the lead grows. My reading, which the paper still has to test, is that reinforcement learning and the critic learn partly different things, so the critic still adds on top.</p>
 
 <h2>One puzzle, end to end</h2>
 <p>Take one solvable 14-block puzzle from the sealed set.</p>
@@ -121,12 +125,12 @@
 </ul>
 <p>Each solved puzzle adds about 0.06 points to its method's score (0.9 divided by 1,530 solvable puzzles). This one shows both effects the averages carry: the critic keeps the original model from a wrong "impossible", and on the RL-trained model it reaches the goal inside a budget that reinforcement learning alone overran.</p>
 
-<h2>A second setting: prompt injection (development data)</h2>
+<h2>The second setting: prompt injection (development data)</h2>
 <p>AgentDojo (Debenedetti and colleagues, NeurIPS 2024) gives a tool-using agent everyday tasks in email, banking, travel and workspace apps, and plants attacker instructions in the data it reads. The score is safe success: the user's task is done and the attacker's is not. On 29 development tasks (314 cases, 285 of them attacked), with the same model:</p>
 <ul>
   <li>The original model alone scored 78.4%.</li>
   <li>The RL-trained model scored 91.3%, and the critic on the original model 88.7% (−2.6 points, 95% interval −6.8 to +0.5). The critic completed tasks as often, but let more attacks through: 7.0% against 0.7%.</li>
-  <li>The critic on the RL-trained model scored 92.5%, 1.2 points above reinforcement learning alone (+0.2 to +2.5). None of its 570 attacked attempts was hijacked, against 8 of the RL-trained model's 1,140.</li>
+  <li>The critic on the RL-trained model scored 92.5%, 1.2 points above reinforcement learning alone (+0.2 to +2.5). None of its 570 attacked attempts was hijacked, against 8 of the RL-trained model's 1,140. As in Blocksworld, the gain is on the risky actions.</li>
 </ul>
 <p>These are development numbers, read before the sealed test, and one comparison among many. A sealed test on held-out tasks comes next.</p>
 
@@ -136,6 +140,7 @@
   <li>In this puzzle set, impossible puzzles share a surface feature that a model could notice. Development data bound how much that could add: under half a point of the score, far less than either margin.</li>
   <li>The comparison matches generated tokens. It does not compare the cost of training a critic with the cost of reinforcement learning.</li>
   <li>The AgentDojo results are from development data.</li>
+  <li>Both settings have risky actions by design. I have not tested a setting without them, so this note does not show that the critic helps less there.</li>
 </ul>
 
 <h2>Methods</h2>

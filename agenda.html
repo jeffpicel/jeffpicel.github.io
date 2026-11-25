@@ -23,7 +23,7 @@
 <p>For those cases I want a monitor that works <em>during</em> the attempt, before the damage, and that carries over to tasks and attacks it wasn't trained on. My working bet is a <strong>critic</strong>: a small network that reads the agent's internal state partway through an attempt and forecasts how the attempt will end.</p>
 
 <h2>First results</h2>
-<p>Reinforcement learning changes the model itself. A critic is a small separate network that leaves the model untouched, so it can be inspected, swapped or switched off. Can the add-on keep up with reinforcement learning? And if you use both, do the gains add up or overlap? So far they overlap a lot, but the critic still adds on top of reinforcement learning.</p>
+<p>Reinforcement learning changes the model itself. A critic is a small separate network that leaves the model untouched, so it can be inspected, swapped or switched off. Can the add-on keep up with reinforcement learning? And if you use both, do the gains add up or overlap? So far they overlap a lot, but on tasks with risky actions the critic still adds on top of reinforcement learning.</p>
 <ul>
   <li><strong>Blocksworld, sealed test of 1,700 planning puzzles:</strong> a critic on the untouched model matched reinforcement learning (78.5% against 78.4%), and a critic on top of reinforcement learning added 5.9 points (95% interval 3.9 to 7.9).</li>
   <li><strong>AgentDojo, prompt injection, development data:</strong> the critic on top of reinforcement learning scored 1.2 points above reinforcement learning alone (95% interval 0.2 to 2.5). A sealed test on held-out tasks comes next.</li>
